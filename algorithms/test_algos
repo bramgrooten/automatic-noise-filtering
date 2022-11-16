@@ -1,0 +1,32 @@
+#!/bin/bash
+### call with: bash test_algos
+# File to test if all algorithms are working correctly.
+# Runs a few training steps,
+# runs a few evaluation episodes,
+# runs a change in environment (permutation)
+
+cd ..
+source venv/bin/activate
+wandb disabled
+
+
+for policy in ANF-SAC ANF-TD3 SAC TD3 Static-SAC Static-TD3
+do
+  python main.py --policy $policy \
+                 --env HalfCheetah-v3 \
+                 --seed 42 \
+                 --eval_freq 2500 \
+                 --start_timesteps 1000 \
+                 --activation relu \
+                 --optimizer maskadam \
+                 --global_sparsity 0.0 \
+                 --sparsity_distribution_method uniform \
+                 --input_layer_sparsity 0.8 \
+                 --not_save_model --not_save_results \
+                 --fake_features 0.5 \
+                 --fake_noise_std 1.0 \
+                 --adjust_env_period 3000 \
+                 --max_timesteps 6000
+  printf "\nFinished policy: $policy \n\n"
+done
+printf "\n\n\nFinished all policies. \n\n"
