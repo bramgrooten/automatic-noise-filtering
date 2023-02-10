@@ -113,15 +113,7 @@ if __name__ == '__main__':
     }
     show_policy(config)
 
-    # For reviewers:
     # if you want to run this file with other config settings,
-    # first download the pretrained models from this site (website of an AAMAS program chair):
-    # https://www.cse.wustl.edu/~wyeoh/aamas2023/paper432/pretrained_models.zip 
-    # and put them in the folder './utils/pretrained_models/'
-    # (we could only upload one model to EasyChair due to the 25MB limit)
-    # This is in accordance with the AAMAS 2023 program chairs.
-
-
-
-
-
+    # first download the pretrained models from: 
+    # https://www.dropbox.com/s/qr1l7bscnnd8non/pretrained_models.zip?dl=0 
+    # extract the zip, and put the model files in the folder './utils/pretrained_models/'
