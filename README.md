@@ -1,6 +1,19 @@
 # Automatic Noise Filtering 
 _with Dynamic Sparse Training in Deep Reinforcement Learning_
 
+Paper: [arxiv.org/abs/2302.06548](https://arxiv.org/abs/2302.06548) (accepted at [AAMAS'23](https://aamas2023.soton.ac.uk/))
+
+If you use this code, please cite:
+```
+@misc{grooten2023automatic,
+      title={{Automatic Noise Filtering with Dynamic Sparse Training in Deep Reinforcement Learning}}, 
+      author={Grooten, Bram and Sokar, Ghada and Dohare, Shibhansh and Mocanu, Elena and Taylor, Matthew E. and Pechenizkiy, Mykola and Mocanu, Decebal Constantin},
+      year={2023},
+      journal={The 22nd International Conference on Autonomous Agents and Multiagent Systems (AAMAS)},
+      note={URL: \url{https://arxiv.org/abs/2302.06548}}
+}
+```
+
 # Abstract
 Tomorrow's robots will need to distinguish useful information from noise when performing different tasks. 
 A household robot for instance may continuously receive a plethora of information about the home, 
@@ -36,11 +49,12 @@ Again ANF surpasses the baselines in final performance and sample complexity.
 ### Instructions 
 First make a virtual environment:
 ```shell
-python -m venv venv
+sudo apt install python3.8 python3.8-venv python3.8-dev
+python3.8 -m venv venv
 source venv/bin/activate
 ```
 
-If you don't have MuJoCo yet:
+If you don't have MuJoCo 2.10 yet:
 ```shell
 cd ~
 wget https://mujoco.org/download/mujoco210-linux-x86_64.tar.gz
@@ -55,8 +69,8 @@ Now you have MuJoCo. Proceed with:
 pip install mujoco_py==2.1.2.14 gym==0.21.0 torch==1.9.0
 pip install wandb --upgrade
 ```
-To run experiments without [W&B](https://wandb.ai/site), call this first: `wandb disabled` (before each run).
-To use W&B, call this first: `wandb login` (just once).
+To run experiments without [W&B](https://wandb.ai/site), call this: `wandb disabled` (before each run).
+To use W&B, run this first: `wandb login` (just once).
 
 
 Now try to import mujoco_py in a python console, 
@@ -65,6 +79,10 @@ and do what the error messages tell you.
 ```python
 $ python
 >>> import mujoco_py
+```
+You may need to install the following packages:
+```shell
+sudo apt install libosmesa6-dev libglew-dev patchelf
 ```
 
 
