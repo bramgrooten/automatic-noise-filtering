@@ -91,7 +91,12 @@ sudo apt install libosmesa6-dev libglew-dev patchelf
 ### Train
 To train an ANF agent on the ENE with 90% noise features, run:
 ```
-python main.py --policy ANF-SAC --env HalfCheetah-v3 --fake_features 0.9
+python main.py \
+    --policy ANF-SAC \
+    --env HalfCheetah-v3 \
+    --fake_features 0.9 \
+    --input_layer_sparsity 0.8 \
+    --wandb_mode disabled
 ```
 
 Possible policies: `ANF-SAC`, `ANF-TD3`, `SAC`, `TD3`.

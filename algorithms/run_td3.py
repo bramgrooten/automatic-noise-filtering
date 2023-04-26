@@ -22,7 +22,7 @@ def run(args, file_name, device):
         if args.save_model:  # Save untrained policy
             agent.save(f"./output/models/{file_name}_iter0")
         # Evaluate untrained policy
-        avg_return0 = utils.eval_policy(agent, eval_env, args.seed, args.print_comments)
+        avg_return0 = utils.eval_policy(agent, eval_env, args.seed, args.print_comments, args.eval_episodes)
         evaluations = [avg_return0]
         wandb.log({'eval_return': avg_return0}, step=0)
 
@@ -60,7 +60,7 @@ def run(args, file_name, device):
 
         # Evaluate the agent
         if (t + 1) % args.eval_freq == 0:
-            avg_return = utils.eval_policy(agent, eval_env, args.seed, args.print_comments)
+            avg_return = utils.eval_policy(agent, eval_env, args.seed, args.print_comments, args.eval_episodes)
             wandb.log({'eval_return': avg_return}, step=agent.total_it)
             num_connections = utils.count_weights(agent, args)
             # wandb.log({'num_connections': num_connections}, step=agent.total_it)

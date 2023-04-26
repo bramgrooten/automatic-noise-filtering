@@ -24,7 +24,7 @@ def eval_policy(policy, env, seed=2, print_comments=True, eval_episodes=10):
 
     if print_comments:
         print("---------------------------------------")
-        print(f"Evaluation over {eval_episodes} episodes: {avg_reward:.3f}")
+        print(f"Evaluation over {eval_episodes} episode(s): {avg_reward:.3f}")
         print("---------------------------------------")
     return avg_reward
 
@@ -41,7 +41,7 @@ def eval_policy_updated_actor(policy, env, seed, print_comments=True, eval_episo
 
     if print_comments:
         print("---------------------------------------")
-        print(f"Evaluation of updated actor over {eval_episodes} episodes: {avg_reward:.3f}")
+        print(f"Evaluation of updated actor over {eval_episodes} episode(s): {avg_reward:.3f}")
         print("---------------------------------------")
     return avg_reward
 
@@ -135,6 +135,8 @@ def add_arguments(parser):
     parser.add_argument('--buffer_size', type=int, default=1_000_000,
                         help='Max capacity of the experience replay buffer (default: 1e6)')
 
+    parser.add_argument("--wandb_mode", default="online", choices=["online", "offline", "disabled"],
+                        help='Wandb mode (online, offline, disabled). Default: online')
     parser.add_argument("--seed", default=42, type=int,
                         help='Random seed. Sets PyTorch and Numpy seeds')
     parser.add_argument("--start_timesteps", default=25e3, type=int,
@@ -146,6 +148,8 @@ def add_arguments(parser):
                              "(current uses the current policy on the new env.) Default: random.")
     parser.add_argument("--eval_freq", default=5e3, type=int,
                         help='How often (time steps) we evaluate')
+    parser.add_argument("--eval_episodes", default=10, type=int,
+                        help='Number of episodes to evaluate for')
     parser.add_argument("--max_timesteps", default=1e6, type=int,
                         help='Max time steps to run environment')
     parser.add_argument("--batch_size", default=100, type=int,

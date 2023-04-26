@@ -15,7 +15,7 @@ if __name__ == "__main__":
     utils.print_all_args(args)
     utils.make_folders()
     file_name = utils.set_file_name(args)
-    wandb.init(project="ANF", config=vars(args), name=file_name, entity="VScAIL")
+    wandb.init(project="ANF", config=vars(args), name=file_name, entity="VScAIL", mode=args.wandb_mode)
 
     # Set seeds
     torch.manual_seed(args.seed)

@@ -8,7 +8,7 @@ def run(args, file_name, device):
     env, eval_env, next_env_change, adjust_env_period, env_num = utils.initialize_environments(args)
     agent = utils.setup_sac_based_agent(args, env, device)
     memory = ReplayMemory(args.buffer_size, args.seed)
-    avg_return0 = utils.eval_policy(agent, eval_env, args.seed, args.print_comments)
+    avg_return0 = utils.eval_policy(agent, eval_env, args.seed, args.print_comments, args.eval_episodes)
     evaluations = [avg_return0]
     wandb.log({'eval_return': avg_return0}, step=0)
 
@@ -50,7 +50,7 @@ def run(args, file_name, device):
 
         # Evaluate the policy
         if (t + 1) % args.eval_freq == 0:
-            avg_return = utils.eval_policy(agent, eval_env, args.seed, args.print_comments)
+            avg_return = utils.eval_policy(agent, eval_env, args.seed, args.print_comments, args.eval_episodes)
             wandb.log({'eval_return': avg_return}, step=t+1)
             num_connections = utils.count_weights(agent, args)
             # wandb.log({'num_connections': num_connections}, step=t+1)
