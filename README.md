@@ -69,8 +69,6 @@ Now you have MuJoCo. Proceed with:
 pip install mujoco_py==2.1.2.14 gym==0.21.0 torch==1.9.0
 pip install wandb --upgrade
 ```
-To run experiments without [W&B](https://wandb.ai/site), call this: `wandb disabled` (before each run).
-To use W&B, run this first: `wandb login` (just once).
 
 
 Now try to import mujoco_py in a python console, 
@@ -80,7 +78,8 @@ and do what the error messages tell you.
 $ python
 >>> import mujoco_py
 ```
-You may need to install the following packages:
+
+You may need to install the following packages to solve some errors:
 ```shell
 sudo apt install libosmesa6-dev libglew-dev patchelf
 ```
