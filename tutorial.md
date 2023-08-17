@@ -199,6 +199,10 @@ Let's try out an environment with 90% noise features by running:
 ```
 python main.py --input_layer_sparsity 0.8 --fake_features 0.9 --policy ANF-SAC --env HalfCheetah-v3 --wandb_mode disabled
 ```
+and compare the performance with
+```
+python main.py --input_layer_sparsity 0.8 --fake_features 0.9 --policy SAC --env HalfCheetah-v3 --wandb_mode disabled
+```
 
 Note that the state space of the environment is now 10X larger, so the runtime will increase. 
 As shown in the graph with learning curves above, 
