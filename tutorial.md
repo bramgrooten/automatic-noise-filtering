@@ -1,9 +1,9 @@
 
 # Sparse Training in Deep RL - Tutorial
 
-This guide is designed for attendees of the [IJCAI](https://ijcai-23.org/tutorials/) 2023 tutorial 
+This guide is designed for attendees of the [IJCAI 2023 tutorial](https://ijcai-23.org/tutorials/) 
 T27: _Sparse Training for Supervised, Unsupervised, Continual, and Deep Reinforcement Learning with Deep Neural Networks_. 
-In the following we will play around with some of the settings in our reposity. 
+In the following we will play around with some of the settings in this reposity. 
 I hope this will give you a feeling for the types of problems we are researching in this field.
 
 Author: [Bram Grooten](https://www.bramgrooten.nl/).
