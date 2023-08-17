@@ -148,15 +148,15 @@ def add_arguments(parser):
                              "(current uses the current policy on the new env.) Default: random.")
     parser.add_argument("--eval_freq", default=5e3, type=int,
                         help='How often (time steps) we evaluate')
-    parser.add_argument("--eval_episodes", default=10, type=int,
+    parser.add_argument("--eval_episodes", default=5, type=int,
                         help='Number of episodes to evaluate for')
     parser.add_argument("--max_timesteps", default=1e6, type=int,
                         help='Max time steps to run environment')
     parser.add_argument("--batch_size", default=100, type=int,
                         help='Batch size for both actor and critic')
-    parser.add_argument("--optimizer", default="maskadam",
-                        help="Optimizer. Options: adam, maskadam, sgd. Default: maskadam "
-                             "(for dense/static TD3 and SAC this is the same as adam).")
+    parser.add_argument("--optimizer", default="adam",
+                        help="Optimizer. Options: adam, maskadam, sgd. Default: adam "
+                             "(for dense/static TD3 and SAC maskadam is the same as adam).")
     parser.add_argument("--lr", default=0.001, type=float,
                         help='Learning rate. Default: 1e-3 (0.001)')
     parser.add_argument("--discount", default=0.99,
@@ -499,21 +499,31 @@ def count_weights(model, args):
     if permutation is None:
         # compute avg number of connections per input neuron
         avg_num_conn_actor_real = np.sum(num_conn_per_in_neuron_actor[:state_dim]) / state_dim
-        avg_num_conn_actor_fake = np.sum(num_conn_per_in_neuron_actor[state_dim:]) / (weights_actor.shape[1] - state_dim)
         avg_num_conn_q1_real = np.sum(num_conn_per_in_neuron_q1[:state_dim]) / state_dim
-        avg_num_conn_q1_fake = np.sum(num_conn_per_in_neuron_q1[state_dim:]) / (weights_q1.shape[1] - state_dim)
         avg_num_conn_q2_real = np.sum(num_conn_per_in_neuron_q2[:state_dim]) / state_dim
-        avg_num_conn_q2_fake = np.sum(num_conn_per_in_neuron_q2[state_dim:]) / (weights_q2.shape[1] - state_dim)
+        if args.fake_features > 0:
+            avg_num_conn_actor_fake = np.sum(num_conn_per_in_neuron_actor[state_dim:]) / (weights_actor.shape[1] - state_dim)
+            avg_num_conn_q1_fake = np.sum(num_conn_per_in_neuron_q1[state_dim:]) / (weights_q1.shape[1] - state_dim)
+            avg_num_conn_q2_fake = np.sum(num_conn_per_in_neuron_q2[state_dim:]) / (weights_q2.shape[1] - state_dim)
+        else:
+            avg_num_conn_actor_fake = 0
+            avg_num_conn_q1_fake = 0
+            avg_num_conn_q2_fake = 0
     else:
         permu = permutation.cpu().numpy()
         new_locs_real_feats = np.where(permu < state_dim)[0]
         new_locs_fake_feats = np.where(permu >= state_dim)[0]
         avg_num_conn_actor_real = np.sum(num_conn_per_in_neuron_actor[new_locs_real_feats]) / state_dim
-        avg_num_conn_actor_fake = np.sum(num_conn_per_in_neuron_actor[new_locs_fake_feats]) / (weights_actor.shape[1] - state_dim)
         avg_num_conn_q1_real = np.sum(num_conn_per_in_neuron_q1[new_locs_real_feats]) / state_dim
-        avg_num_conn_q1_fake = np.sum(num_conn_per_in_neuron_q1[new_locs_fake_feats]) / (weights_q1.shape[1] - state_dim)
         avg_num_conn_q2_real = np.sum(num_conn_per_in_neuron_q2[new_locs_real_feats]) / state_dim
-        avg_num_conn_q2_fake = np.sum(num_conn_per_in_neuron_q2[new_locs_fake_feats]) / (weights_q2.shape[1] - state_dim)
+        if args.fake_features > 0:
+            avg_num_conn_actor_fake = np.sum(num_conn_per_in_neuron_actor[new_locs_fake_feats]) / (weights_actor.shape[1] - state_dim)
+            avg_num_conn_q1_fake = np.sum(num_conn_per_in_neuron_q1[new_locs_fake_feats]) / (weights_q1.shape[1] - state_dim)
+            avg_num_conn_q2_fake = np.sum(num_conn_per_in_neuron_q2[new_locs_fake_feats]) / (weights_q2.shape[1] - state_dim)
+        else:
+            avg_num_conn_actor_fake = 0
+            avg_num_conn_q1_fake = 0
+            avg_num_conn_q2_fake = 0
 
     return [avg_num_conn_actor_real, avg_num_conn_actor_fake,
             avg_num_conn_q1_real, avg_num_conn_q1_fake,

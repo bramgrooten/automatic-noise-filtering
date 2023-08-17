@@ -2,34 +2,6 @@ import numpy as np
 import torch
 
 
-def initializeEpsilonWeightsMask(text, epsilon, noRows, noCols):
-    # generate an epsilon based Erdos Renyi sparse weights mask
-    mask_weights = np.random.rand(noRows, noCols)
-    prob = 1 - (epsilon * (noRows + noCols)) / (noRows * noCols)
-    mask_weights = np.random.rand(noRows, noCols)
-    mask_weights[mask_weights < prob] = 0
-    mask_weights[mask_weights >= prob] = 1
-    noParameters = np.sum(mask_weights)
-    sparsity = 1-noParameters/(noRows * noCols)
-    print("Epsilon Sparse Initialization ",text,": Epsilon ",epsilon,"; Sparsity ",sparsity,"; NoParameters ",noParameters,"; NoRows ",noRows,"; NoCols ",noCols,"; NoDenseParam ",noRows*noCols)
-    print(" OutDegreeBottomNeurons %.2f ± %.2f; InDegreeTopNeurons %.2f ± %.2f" % (np.mean(mask_weights.sum(axis=1)),np.std(mask_weights.sum(axis=1)),np.mean(mask_weights.sum(axis=0)),np.std(mask_weights.sum(axis=0))))
-    return noParameters, mask_weights.transpose()
-
-
-def initializeSparsityLevelWeightMask(text, sparsityLevel, noRows, noCols):
-    # generate an Erdos Renyi sparse weights mask
-    prob = sparsityLevel
-    mask_weights = np.random.rand(noRows, noCols)
-    mask_weights[mask_weights < prob] = 0
-    mask_weights[mask_weights >= prob] = 1
-    noParameters = np.sum(mask_weights)
-    sparsity = 1 - noParameters/(noRows * noCols)
-    epsilon = int((prob*(noRows * noCols)-1)/(noRows + noCols))
-    print("Sparsity Level Initialization ",text,": Computed Epsilon ",epsilon,"; Sparsity ",sparsity,"; NoParameters ",noParameters,"; NoRows ",noRows,"; NoCols ",noCols,"; NoDenseParam ",noRows*noCols)
-    print(" OutDegreeBottomNeurons %.2f ± %.2f; InDegreeTopNeurons %.2f ± %.2f" % (np.mean(mask_weights.sum(axis=1)),np.std(mask_weights.sum(axis=1)),np.mean(mask_weights.sum(axis=0)),np.std(mask_weights.sum(axis=0))))
-    return noParameters, mask_weights.transpose()
-
-
 def initialize_mask(layer_name, layer_sparsity_level, num_in_neurons, num_out_neurons, print_info=True):
     """ New version of initializeSparsityLevelWeightMask
     that produces the exact sparsity level, instead of something closeby. """
@@ -37,51 +9,13 @@ def initialize_mask(layer_name, layer_sparsity_level, num_in_neurons, num_out_ne
     num_connections = int((1 - layer_sparsity_level) * total_connections)
     mask = np.zeros((num_in_neurons, num_out_neurons))
     mask = grow_set(mask, num_connections)
-    if print_info:
-        print(f"Sparsity Level Initialization {layer_name}: sparsity {1 - np.sum(mask)/total_connections:.6f}; "
-              f"num active connections {num_connections}; num_in_neurons {num_in_neurons}; "
-              f"num_out_neurons {num_out_neurons}; num_dense_connections {total_connections}")
-        print(f" OutDegreeBottomNeurons {np.mean(mask.sum(axis=1)):.2f} ± {np.std(mask.sum(axis=1)):.2f};"
-              f" InDegreeTopNeurons {np.mean(mask.sum(axis=0)):.2f} ± {np.std(mask.sum(axis=0)):.2f}")
+    # if print_info:
+    #     print(f"Sparsity Level Initialization {layer_name}: sparsity {1 - np.sum(mask)/total_connections:.6f}; "
+    #           f"num active connections {num_connections}; num_in_neurons {num_in_neurons}; "
+    #           f"num_out_neurons {num_out_neurons}; num_dense_connections {total_connections}")
+    #     print(f" OutDegreeBottomNeurons {np.mean(mask.sum(axis=1)):.2f} ± {np.std(mask.sum(axis=1)):.2f};"
+    #           f" InDegreeTopNeurons {np.mean(mask.sum(axis=0)):.2f} ± {np.std(mask.sum(axis=0)):.2f}")
     return num_connections, mask.transpose()
-
-
-def find_first_pos(array, value):
-    idx = (np.abs(array - value)).argmin()
-    return idx
-
-
-def find_last_pos(array, value):
-    idx = (np.abs(array - value))[::-1].argmin()
-    return array.shape[0] - idx
-
-
-def changeConnectivitySET(weights, num_weights, zeta, iteration):
-    # change connectivity
-    # remove zeta largest negative and smallest positive weights
-    # weights = weights * mask  # unnecessary as we apply mask before the topo update now
-    values = np.sort(weights.ravel())
-    firstZeroPos = find_first_pos(values, 0)
-    lastZeroPos = find_last_pos(values, 0)
-    largestNegative = values[int((1 - zeta) * firstZeroPos)]
-    smallestPositive = values[int(min(values.shape[0] - 1, lastZeroPos + zeta * (values.shape[0] - lastZeroPos)))]
-    rewired_weights = weights.copy()
-    rewired_weights[rewired_weights > smallestPositive] = 1
-    rewired_weights[rewired_weights < largestNegative] = 1
-    rewired_weights[rewired_weights != 1] = 0
-
-    # add random weights
-    nrAdd = 0
-    num_rewires = num_weights - np.sum(rewired_weights)
-    while nrAdd < num_rewires:
-        i = np.random.randint(0, rewired_weights.shape[0])
-        j = np.random.randint(0, rewired_weights.shape[1])
-        if rewired_weights[i, j] == 0:
-            rewired_weights[i, j] = 1
-            nrAdd += 1
-
-    ascStats = [iteration, nrAdd, num_weights, np.count_nonzero(rewired_weights)]
-    return rewired_weights, ascStats
 
 
 def adjust_connectivity_set(weights, num_weights, zeta, mask):
@@ -126,52 +60,12 @@ def prune_set_only_active(weights, zeta, mask, num_weights):
 
 
 def grow_set(mask, num_weights):
-    """ Grow new connections. Choose randomly from the available options. """
+    """ Grow new connections according to SET: Choose randomly from the available options. """
     num_to_grow = num_weights - np.sum(mask)
     idx_zeros_i, idx_zeros_j = np.where(mask == 0)
     new_conn_idx = np.random.choice(idx_zeros_i.shape[0], int(num_to_grow), replace=False)
     mask[idx_zeros_i[new_conn_idx], idx_zeros_j[new_conn_idx]] = 1
     return mask
-
-
-# this function is not used, figure out its purpose later
-def changeConnectivityXReLU(weights, noWeights, initMask, lastTopologyChange, iteration):
-    weights = weights * initMask
-
-    weightspos = weights.copy()
-    weightspos[weightspos < 0] = 0
-    strengthpos = np.sum(weightspos, axis=0)
-
-    weightsneg = weights.copy()
-    weightsneg[weightsneg > 0] = 0
-    strengthneg = np.sum(weightsneg, axis=0)
-
-    for j in range(strengthpos.shape[0]):
-        if (strengthpos[j] + strengthneg[j] < 0):
-            difference = strengthpos[j]
-            iis = np.nonzero(weightsneg[:, j])[0]
-            ww = weightsneg[iis, j]
-            iisort = np.argsort(ww)
-            for i in iisort:
-                if (difference > 0):
-                    difference += weightsneg[iis[i], j]
-                else:
-                    weights[iis[i], j] = 0
-    rewiredWeights = weights.copy()
-    rewiredWeights[rewiredWeights != 0] = 1
-
-    nrAdd = 0
-    if not lastTopologyChange:
-        noRewires = noWeights - np.sum(rewiredWeights)
-        while (nrAdd < noRewires):
-            i = np.random.randint(0, rewiredWeights.shape[0])
-            j = np.random.randint(0, rewiredWeights.shape[1])
-            if (rewiredWeights[i, j] == 0):
-                rewiredWeights[i, j] = 1
-                nrAdd += 1
-
-    ascStats = [iteration, nrAdd, noWeights, np.count_nonzero(rewiredWeights)]
-    return [rewiredWeights, ascStats]
 
 
 def critic_give_new_connections_init_values(critic, q1_old_masks, q2_old_masks, init_new_weights_method, device):
@@ -282,7 +176,7 @@ def print_sparsity_one_network(params, network_name):
     return global_sparsity, layer_sparsities
 
 
-def compute_sparsity_per_layer(global_sparsity, neuron_layers, keep_dense, closeness=0.5, method='ER', input_layer_sparsity=-1.):
+def compute_sparsity_per_layer(global_sparsity, neuron_layers, keep_dense, closeness=0.2, method='ER', input_layer_sparsity=-1.):
     """
     Function to compute the sparsity levels of individual layers, based on a given global sparsity level.
     Instead of a uniform sparsity (for example 80% in every layer),
@@ -430,7 +324,7 @@ if __name__ == '__main__':
                 # 'SlipperyAnt': (29, 8)
                 }
 
-    # glob_sparsities = [0, .5, .8, .9, .95, 0.96, 0.97]  # , .98]  # , 0.7, 0.9]
+    # glob_sparsities = [0, .5, .8, .9, .95, 0.96, 0.97]  # , .98]
     glob_sparsities = [0]
     fake_feats_multiplier = 10
 
@@ -447,26 +341,6 @@ if __name__ == '__main__':
                                                         input_layer_sparsity=0.8)
                 print(f"desired global: {glob_sparsity}, sparsity per layer {method[:2]}: {sparsities}")
 
-
-    # test_weights = 10*(np.random.rand(10, 10) - 0.5)
-    # print(test_weights)
-    # print(np.count_nonzero(test_weights))
-    # mask = prune_set(test_weights, 0.5)
-    # print(mask)
-    # print(np.count_nonzero(mask))
-    #
-    # new_weights = test_weights * mask
-    # print(new_weights)
-    # print(np.count_nonzero(new_weights))
-    #
-    # mask = prune_set(new_weights, 0.1)
-    # print(mask)
-    # print(np.count_nonzero(mask))
-    #
-    # new_weights = new_weights * mask
-    # mask = grow_set(mask, 50)
-    # print(mask)
-    # print(np.count_nonzero(mask))
 
 
 

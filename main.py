@@ -25,9 +25,9 @@ if __name__ == "__main__":
     print(f"Using device: {device}")
 
     if 'TD3' in args.policy:
-        run_td3.run(args, file_name, device)
+        run_td3.run(args, file_name, device, main_start_time)
     elif 'SAC' in args.policy:
-        run_sac.run(args, file_name, device)
+        run_sac.run(args, file_name, device, main_start_time)
     else:
         raise ValueError("Invalid policy name")
 

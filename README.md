@@ -1,8 +1,7 @@
 # Automatic Noise Filtering 
 _with Dynamic Sparse Training in Deep Reinforcement Learning_
 
-Paper: [arxiv.org/abs/2302.06548](https://arxiv.org/abs/2302.06548) (accepted at [AAMAS'23](https://aamas2023.soton.ac.uk/))
-
+Paper: [arxiv.org/abs/2302.06548](https://arxiv.org/abs/2302.06548) accepted at [AAMAS'23](https://aamas2023.soton.ac.uk/).
 If you use this code, please cite:
 ```
 @misc{grooten2023automatic,
@@ -13,6 +12,8 @@ If you use this code, please cite:
       note={URL: \url{https://arxiv.org/abs/2302.06548}}
 }
 ```
+
+![Image showing the overview of ANF](figures/ANF.png)
 
 # Abstract
 Tomorrow's robots will need to distinguish useful information from noise when performing different tasks. 

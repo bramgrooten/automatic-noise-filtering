@@ -2,9 +2,10 @@ import numpy as np
 import wandb
 from utils.replay_memory_sac import ReplayMemory, fill_initial_replay_memory, refill_replay_buffer
 from utils import utils
+import datetime
 
 
-def run(args, file_name, device):
+def run(args, file_name, device, main_start_time):
     env, eval_env, next_env_change, adjust_env_period, env_num = utils.initialize_environments(args)
     agent = utils.setup_sac_based_agent(args, env, device)
     memory = ReplayMemory(args.buffer_size, args.seed)
@@ -25,6 +26,7 @@ def run(args, file_name, device):
     state, done = env.reset(), False
     episode_reward, episode_steps, episode_num = 0, 0, 0
     max_eval_return = float('-inf')
+    episode_start_time = datetime.datetime.now()
     loss_info_dict = {}
 
     # Training Loop
@@ -48,6 +50,24 @@ def run(args, file_name, device):
             updates += 1
         # wandb.log(loss_info_dict, step=t+1)
 
+        if done:
+            if args.print_comments:
+                print(f"Total Steps: {t+1}  Episode Num: {episode_num}  "
+                      f"Epi. Steps: {episode_steps}  Reward: {round(episode_reward, 2)}  "
+                      f"Epi. Time: {datetime.datetime.now() - episode_start_time}  "
+                      f"Total Train Time: {datetime.datetime.now() - main_start_time}")
+            if t > next_env_change:
+                agent.set_new_permutation()
+                next_env_change += adjust_env_period
+                if args.empty_buffer_on_env_change:
+                    memory.empty_buffer()
+                    refill_replay_buffer(memory, env, agent, args)
+            # Reset environment
+            state, done = env.reset(), False
+            episode_reward, episode_steps = 0, 0
+            episode_num += 1
+            episode_start_time = datetime.datetime.now()
+
         # Evaluate the policy
         if (t + 1) % args.eval_freq == 0:
             avg_return = utils.eval_policy(agent, eval_env, args.seed, args.print_comments, args.eval_episodes)
@@ -65,21 +85,6 @@ def run(args, file_name, device):
                 max_eval_return = avg_return
                 if args.save_model:
                     agent.save(f"./output/models/{file_name}_best")
-
-        if done:
-            if args.print_comments:
-                print(f"Total T: {t+1} Episode Num: {episode_num} "
-                      f"Episode T: {episode_steps}, Reward: {round(episode_reward, 2)}")
-            if t > next_env_change:
-                agent.set_new_permutation()
-                next_env_change += adjust_env_period
-                if args.empty_buffer_on_env_change:
-                    memory.empty_buffer()
-                    refill_replay_buffer(memory, env, agent, args)
-            # Reset environment
-            state, done = env.reset(), False
-            episode_reward, episode_steps = 0, 0
-            episode_num += 1
 
         # Save current policy
         if args.save_model and (t + 1) % args.save_model_period == 0:

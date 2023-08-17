@@ -4,7 +4,7 @@ import wandb
 from utils import utils
 
 
-def run(args, file_name, device):
+def run(args, file_name, device, main_start_time):
     env, eval_env, next_env_change, adjust_env_period, env_num = utils.initialize_environments(args)
     state_dim, action_dim = env.observation_space.shape[0], env.action_space.shape[0]
     max_action = float(env.action_space.high[0])
@@ -58,6 +58,23 @@ def run(args, file_name, device):
         # Train the agent
         agent.train(replay_buffer, args.batch_size)
 
+        if done:
+            if args.print_comments:
+                print(f"Total Steps: {t + 1}  Episode Num: {episode_num + 1}  Epi. Steps: {episode_steps}  "
+                      f"Reward: {episode_reward:.3f}  Epi. Time: {datetime.datetime.now() - episode_start_time}  "
+                      f"Total train time: {datetime.datetime.now() - main_start_time}")
+            if t > next_env_change:
+                agent.set_new_permutation()
+                next_env_change += adjust_env_period
+                if args.empty_buffer_on_env_change:
+                    replay_buffer.empty_buffer()
+                    utils.refill_replay_buffer(replay_buffer, env, agent, args)
+            # Reset environment
+            state, done = env.reset(), False
+            episode_reward, episode_steps = 0, 0
+            episode_num += 1
+            episode_start_time = datetime.datetime.now()
+
         # Evaluate the agent
         if (t + 1) % args.eval_freq == 0:
             avg_return = utils.eval_policy(agent, eval_env, args.seed, args.print_comments, args.eval_episodes)
@@ -75,22 +92,6 @@ def run(args, file_name, device):
                 max_eval_return = avg_return
                 if args.save_model:
                     agent.save(f"./output/models/{file_name}_best")
-
-        if done:
-            if args.print_comments:
-                print(f"Total T: {t + 1} Episode Num: {episode_num + 1} Episode T: {episode_steps} "
-                      f"Reward: {episode_reward:.3f} Time: {datetime.datetime.now() - episode_start_time}")
-            if t > next_env_change:
-                agent.set_new_permutation()
-                next_env_change += adjust_env_period
-                if args.empty_buffer_on_env_change:
-                    replay_buffer.empty_buffer()
-                    utils.refill_replay_buffer(replay_buffer, env, agent, args)
-            # Reset environment
-            state, done = env.reset(), False
-            episode_reward, episode_steps = 0, 0
-            episode_num += 1
-            episode_start_time = datetime.datetime.now()
 
         # Save current policy
         if args.save_model and (t + 1) % args.save_model_period == 0:
