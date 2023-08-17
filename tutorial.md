@@ -99,7 +99,7 @@ The graph below should give an indication of the expected returns for HalfCheeta
 Note that the graph is from Figure 5 of the [ANF paper](https://arxiv.org/abs/2302.06548), 
 where we used environments with large amounts of noise features. 
 Sparse neural networks can help to focus on the task-relevant features, 
-but we'll cover that in the section on Automatic Noise Filtering below.
+but we'll cover that in the section on Automatic Noise Filtering further below.
 
 ![Learning curves plot on HalfCheetah](figures/learning_curves_halfcheetah_nf98.png)
 
@@ -135,7 +135,8 @@ What is always adapted in DST is which weights are currently activated.
 In this repository for RL we often use small MLP networks with 3 layers. 
 The hidden layer has 256 neurons on each side. The input layer size depends on the environment, 
 and the output layer has either the same number of neurons as the number of actions 
-(for the Actor network) or just 1 neuron (for the Critic networks).
+(for the Actor network) or just 1 neuron (for the Critic networks). 
+For example, the Actor network on HalfCheetah consists of: 17-256-256-6.
 We often keep the crucial output layer dense, which especially makes sense for the Critic.
 
 A typical sparsity distribution for a 90% sparse NN in our work would be:
