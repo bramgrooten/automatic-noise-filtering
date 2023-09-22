@@ -4,12 +4,12 @@ _with Dynamic Sparse Training in Deep Reinforcement Learning_
 Paper: [arxiv.org/abs/2302.06548](https://arxiv.org/abs/2302.06548) accepted at [AAMAS'23](https://aamas2023.soton.ac.uk/).
 If you use this code, please cite:
 ```
-@misc{grooten2023automatic,
-      title={{Automatic Noise Filtering with Dynamic Sparse Training in Deep Reinforcement Learning}}, 
-      author={Grooten, Bram and Sokar, Ghada and Dohare, Shibhansh and Mocanu, Elena and Taylor, Matthew E. and Pechenizkiy, Mykola and Mocanu, Decebal Constantin},
-      year={2023},
-      journal={The 22nd International Conference on Autonomous Agents and Multiagent Systems (AAMAS)},
-      note={URL: \url{https://arxiv.org/abs/2302.06548}}
+@article{grooten2023automatic,
+    title={{Automatic Noise Filtering with Dynamic Sparse Training in Deep Reinforcement Learning}}, 
+    author={Grooten, Bram and Sokar, Ghada and Dohare, Shibhansh and Mocanu, Elena and Taylor, Matthew E. and Pechenizkiy, Mykola and Mocanu, Decebal Constantin},
+    year={2023},
+    journal={The 22nd International Conference on Autonomous Agents and Multiagent Systems (AAMAS)},
+    note={URL: \url{https://arxiv.org/abs/2302.06548}}
 }
 ```
 
