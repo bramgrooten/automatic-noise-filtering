@@ -489,7 +489,7 @@ def count_weights(model, args):
                 'Walker2d-v3': (17, 6),
                 'Hopper-v3': (11, 3),
                 'Humanoid-v3': (376, 17)}
-    state_dim, _ = env_dims[args.env]
+    state_dim, action_dim = env_dims[args.env]
 
     num_conn_per_in_neuron_actor = np.count_nonzero(weights_actor, axis=0)
     num_conn_per_in_neuron_q1 = np.count_nonzero(weights_q1, axis=0)
@@ -499,12 +499,12 @@ def count_weights(model, args):
     if permutation is None:
         # compute avg number of connections per input neuron
         avg_num_conn_actor_real = np.sum(num_conn_per_in_neuron_actor[:state_dim]) / state_dim
-        avg_num_conn_q1_real = np.sum(num_conn_per_in_neuron_q1[:state_dim]) / state_dim
-        avg_num_conn_q2_real = np.sum(num_conn_per_in_neuron_q2[:state_dim]) / state_dim
+        avg_num_conn_q1_real = (np.sum(num_conn_per_in_neuron_q1[:state_dim]) + np.sum(num_conn_per_in_neuron_q1[-action_dim:])) / (state_dim + action_dim)
+        avg_num_conn_q2_real = (np.sum(num_conn_per_in_neuron_q2[:state_dim]) + np.sum(num_conn_per_in_neuron_q2[-action_dim:])) / (state_dim + action_dim)
         if args.fake_features > 0:
             avg_num_conn_actor_fake = np.sum(num_conn_per_in_neuron_actor[state_dim:]) / (weights_actor.shape[1] - state_dim)
-            avg_num_conn_q1_fake = np.sum(num_conn_per_in_neuron_q1[state_dim:]) / (weights_q1.shape[1] - state_dim)
-            avg_num_conn_q2_fake = np.sum(num_conn_per_in_neuron_q2[state_dim:]) / (weights_q2.shape[1] - state_dim)
+            avg_num_conn_q1_fake = np.sum(num_conn_per_in_neuron_q1[state_dim:-action_dim]) / (weights_q1.shape[1] - state_dim - action_dim)
+            avg_num_conn_q2_fake = np.sum(num_conn_per_in_neuron_q2[state_dim:-action_dim]) / (weights_q2.shape[1] - state_dim - action_dim)
         else:
             avg_num_conn_actor_fake = 0
             avg_num_conn_q1_fake = 0
